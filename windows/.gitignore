@@ -13,3 +13,6 @@ Release
 .libs
 *.lo
 *.la
+aboot.exe
+aboot.o
+hid.o
