@@ -1,0 +1,123 @@
+!_TAG_FILE_FORMAT	2	/extended format; --format=1 will not append ;" to lines/
+!_TAG_FILE_SORTED	1	/0=unsorted, 1=sorted, 2=foldcase/
+!_TAG_PROGRAM_AUTHOR	Darren Hiebert	/dhiebert@users.sourceforge.net/
+!_TAG_PROGRAM_NAME	Exuberant Ctags	//
+!_TAG_PROGRAM_URL	http://ctags.sourceforge.net	/official site/
+!_TAG_PROGRAM_VERSION	5.9~svn20110310	//
+CC	Makefile	/^CC=i686-w64-mingw32-gcc$/;"	m
+CFLAGS	Makefile	/^CFLAGS=-I..\/hidapi -g -c$/;"	m
+COBJS	Makefile	/^COBJS=hid.o$/;"	m
+COMMONMKFILE	ddk_build/makefile	/^COMMONMKFILE = hidapi.mk$/;"	m
+CPPOBJS	Makefile	/^CPPOBJS=aboot.o$/;"	m
+CXX	Makefile	/^CXX=i686-w64-mingw32-g++$/;"	m
+DLL_LDFLAGS	Makefile	/^DLL_LDFLAGS =  -lsetupapi$/;"	m
+ENUMERATE	aboot.c	23;"	d	file:
+FeatureReportByteLength	hid.c	/^		USHORT FeatureReportByteLength;$/;"	m	struct:_HIDP_CAPS	file:
+HIDD_ATTRIBUTES	hid.c	/^	} HIDD_ATTRIBUTES, *PHIDD_ATTRIBUTES;$/;"	t	typeref:struct:_HIDD_ATTRIBUTES	file:
+HIDP_CAPS	hid.c	/^	} HIDP_CAPS, *PHIDP_CAPS;$/;"	t	typeref:struct:_HIDP_CAPS	file:
+HIDP_STATUS_SUCCESS	hid.c	97;"	d	file:
+HID_OUT_CTL_CODE	hid.c	51;"	d	file:
+HidD_FreePreparsedData	hid.c	/^	static HidD_FreePreparsedData_ HidD_FreePreparsedData;$/;"	v	file:
+HidD_FreePreparsedData_	hid.c	/^	typedef BOOLEAN (__stdcall *HidD_FreePreparsedData_)(PHIDP_PREPARSED_DATA preparsed_data);$/;"	t	file:
+HidD_GetAttributes	hid.c	/^	static HidD_GetAttributes_ HidD_GetAttributes;$/;"	v	file:
+HidD_GetAttributes_	hid.c	/^	typedef BOOLEAN (__stdcall *HidD_GetAttributes_)(HANDLE device, PHIDD_ATTRIBUTES attrib);$/;"	t	file:
+HidD_GetFeature	hid.c	/^	static HidD_GetFeature_ HidD_GetFeature;$/;"	v	file:
+HidD_GetFeature_	hid.c	/^	typedef BOOLEAN (__stdcall *HidD_GetFeature_)(HANDLE handle, PVOID data, ULONG length);$/;"	t	file:
+HidD_GetIndexedString	hid.c	/^	static HidD_GetIndexedString_ HidD_GetIndexedString;$/;"	v	file:
+HidD_GetIndexedString_	hid.c	/^	typedef BOOLEAN (__stdcall *HidD_GetIndexedString_)(HANDLE handle, ULONG string_index, PVOID buffer, ULONG buffer_len);$/;"	t	file:
+HidD_GetManufacturerString	hid.c	/^	static HidD_GetManufacturerString_ HidD_GetManufacturerString;$/;"	v	file:
+HidD_GetManufacturerString_	hid.c	/^	typedef BOOLEAN (__stdcall *HidD_GetManufacturerString_)(HANDLE handle, PVOID buffer, ULONG buffer_len);$/;"	t	file:
+HidD_GetPreparsedData	hid.c	/^	static HidD_GetPreparsedData_ HidD_GetPreparsedData;$/;"	v	file:
+HidD_GetPreparsedData_	hid.c	/^	typedef BOOLEAN (__stdcall *HidD_GetPreparsedData_)(HANDLE handle, PHIDP_PREPARSED_DATA *preparsed_data);$/;"	t	file:
+HidD_GetProductString	hid.c	/^	static HidD_GetProductString_ HidD_GetProductString;$/;"	v	file:
+HidD_GetProductString_	hid.c	/^	typedef BOOLEAN (__stdcall *HidD_GetProductString_)(HANDLE handle, PVOID buffer, ULONG buffer_len);$/;"	t	file:
+HidD_GetSerialNumberString	hid.c	/^	static HidD_GetSerialNumberString_ HidD_GetSerialNumberString;$/;"	v	file:
+HidD_GetSerialNumberString_	hid.c	/^	typedef BOOLEAN (__stdcall *HidD_GetSerialNumberString_)(HANDLE device, PVOID buffer, ULONG buffer_len);$/;"	t	file:
+HidD_SetFeature	hid.c	/^	static HidD_SetFeature_ HidD_SetFeature;$/;"	v	file:
+HidD_SetFeature_	hid.c	/^	typedef BOOLEAN (__stdcall *HidD_SetFeature_)(HANDLE handle, PVOID data, ULONG length);$/;"	t	file:
+HidD_SetNumInputBuffers	hid.c	/^	static HidD_SetNumInputBuffers_ HidD_SetNumInputBuffers;$/;"	v	file:
+HidD_SetNumInputBuffers_	hid.c	/^	typedef BOOLEAN (__stdcall *HidD_SetNumInputBuffers_)(HANDLE handle, ULONG number_buffers);$/;"	t	file:
+HidP_GetCaps	hid.c	/^	static HidP_GetCaps_ HidP_GetCaps;$/;"	v	file:
+HidP_GetCaps_	hid.c	/^	typedef NTSTATUS (__stdcall *HidP_GetCaps_)(PHIDP_PREPARSED_DATA preparsed_data, HIDP_CAPS *caps);$/;"	t	file:
+IOCTL_HID_GET_FEATURE	hid.c	53;"	d	file:
+IS_32	ddk_build/makefile	/^IS_32 = TRUE$/;"	m
+IS_DDK	ddk_build/makefile	/^IS_DDK = TRUE$/;"	m
+IS_PRIVATE	ddk_build/makefile	/^IS_PRIVATE = TRUE$/;"	m
+IS_SDK	ddk_build/makefile	/^IS_SDK = TRUE$/;"	m
+InputReportByteLength	hid.c	/^		USHORT InputReportByteLength;$/;"	m	struct:_HIDP_CAPS	file:
+LD	Makefile	/^LD=i686-w64-mingw32-ld$/;"	m
+LIBS	Makefile	/^LIBS= -lsetupapi$/;"	m
+MAX_STR	aboot.c	137;"	d	file:
+NTSTATUS	hid.c	/^typedef LONG NTSTATUS;$/;"	t	file:
+OBJS	Makefile	/^OBJS=$(COBJS) $(CPPOBJS)$/;"	m
+OutputReportByteLength	hid.c	/^		USHORT OutputReportByteLength;$/;"	m	struct:_HIDP_CAPS	file:
+P32	hid.c	871;"	d	file:
+PHIDD_ATTRIBUTES	hid.c	/^	} HIDD_ATTRIBUTES, *PHIDD_ATTRIBUTES;$/;"	t	typeref:struct:_HIDD_ATTRIBUTES	file:
+PHIDP_CAPS	hid.c	/^	} HIDP_CAPS, *PHIDP_CAPS;$/;"	t	typeref:struct:_HIDP_CAPS	file:
+PHIDP_PREPARSED_DATA	hid.c	/^	typedef void* PHIDP_PREPARSED_DATA;$/;"	t	file:
+ProductID	hid.c	/^		USHORT ProductID;$/;"	m	struct:_HIDD_ATTRIBUTES	file:
+ProductID	hid.c	/^	unsigned short ProductID = 0x0001;$/;"	v
+ProductID	hid.c	/^	unsigned short ProductID = 0x3f;$/;"	v
+ProductID	hid.c	/^  unsigned short ProductID = 0x0033;$/;"	v
+RESOLVE	hid.c	200;"	d	file:
+RESOLVE	hid.c	212;"	d	file:
+ROOT	ddk_build/makefile	/^ROOT=..\\..\\..\\..$/;"	m
+Reserved	hid.c	/^		USHORT Reserved[17];$/;"	m	struct:_HIDP_CAPS	file:
+Size	hid.c	/^		ULONG Size;$/;"	m	struct:_HIDD_ATTRIBUTES	file:
+USAGE	hid.c	/^	typedef USHORT USAGE;$/;"	t	file:
+Usage	hid.c	/^		USAGE Usage;$/;"	m	struct:_HIDP_CAPS	file:
+UsagePage	hid.c	/^		USAGE UsagePage;$/;"	m	struct:_HIDP_CAPS	file:
+VERSIONLIST	ddk_build/makefile	/^VERSIONLIST = debug retail$/;"	m
+VendorID	hid.c	/^		USHORT VendorID;$/;"	m	struct:_HIDD_ATTRIBUTES	file:
+VendorID	hid.c	/^  unsigned short VendorID = 0x04d8;$/;"	v
+VendorID	hid.c	/^  unsigned short VendorID = 0xa0a0;$/;"	v
+VersionNumber	hid.c	/^		USHORT VersionNumber;$/;"	m	struct:_HIDD_ATTRIBUTES	file:
+WIN32	ddk_build/makefile	/^WIN32 = TRUE$/;"	m
+WSTR_LEN	hid.c	386;"	d	file:
+_HIDD_ATTRIBUTES	hid.c	/^	typedef struct _HIDD_ATTRIBUTES{$/;"	s	file:
+_HIDP_CAPS	hid.c	/^	typedef struct _HIDP_CAPS {$/;"	s	file:
+_wcsdup	hid.c	36;"	d	file:
+blocking	hid.c	/^		BOOL blocking;$/;"	m	struct:hid_device_	file:
+device_handle	hid.c	/^		HANDLE device_handle;$/;"	m	struct:hid_device_	file:
+do_xmodem	aboot.c	/^static fsm_type do_xmodem(hid_device * handle)$/;"	f	file:
+fields_not_used_by_hidapi	hid.c	/^		USHORT fields_not_used_by_hidapi[10];$/;"	m	struct:_HIDP_CAPS	file:
+free_hid_device	hid.c	/^static void free_hid_device(hid_device *dev)$/;"	f	file:
+fsm_cpl	aboot.c	/^fsm_cpl     =  0, $/;"	e	enum:__anon1	file:
+fsm_err	aboot.c	/^fsm_err     = -1,$/;"	e	enum:__anon1	file:
+fsm_ongoing	aboot.c	/^fsm_ongoing =  1,$/;"	e	enum:__anon1	file:
+fsm_type	aboot.c	/^}fsm_type;$/;"	t	typeref:enum:__anon1	file:
+hid_close	hid.c	/^void HID_API_EXPORT HID_API_CALL hid_close(hid_device *dev)$/;"	f
+hid_device_	hid.c	/^struct hid_device_ {$/;"	s	file:
+hid_enumerate	hid.c	/^struct hid_device_info HID_API_EXPORT * HID_API_CALL hid_enumerate(unsigned short vendor_id, unsigned short product_id)$/;"	f
+hid_error	hid.c	/^HID_API_EXPORT const wchar_t * HID_API_CALL  hid_error(hid_device *dev)$/;"	f
+hid_exit	hid.c	/^int HID_API_EXPORT hid_exit(void)$/;"	f
+hid_free_enumeration	hid.c	/^void  HID_API_EXPORT HID_API_CALL hid_free_enumeration(struct hid_device_info *devs)$/;"	f
+hid_get_feature_report	hid.c	/^int HID_API_EXPORT HID_API_CALL hid_get_feature_report(hid_device *dev, unsigned char *data, size_t length)$/;"	f
+hid_get_indexed_string	hid.c	/^int HID_API_EXPORT_CALL HID_API_CALL hid_get_indexed_string(hid_device *dev, int string_index, wchar_t *string, size_t maxlen)$/;"	f
+hid_get_manufacturer_string	hid.c	/^int HID_API_EXPORT_CALL HID_API_CALL hid_get_manufacturer_string(hid_device *dev, wchar_t *string, size_t maxlen)$/;"	f
+hid_get_product_string	hid.c	/^int HID_API_EXPORT_CALL HID_API_CALL hid_get_product_string(hid_device *dev, wchar_t *string, size_t maxlen)$/;"	f
+hid_get_serial_number_string	hid.c	/^int HID_API_EXPORT_CALL HID_API_CALL hid_get_serial_number_string(hid_device *dev, wchar_t *string, size_t maxlen)$/;"	f
+hid_init	hid.c	/^int HID_API_EXPORT hid_init(void)$/;"	f
+hid_open	hid.c	/^HID_API_EXPORT hid_device * HID_API_CALL hid_open(unsigned short vendor_id, unsigned short product_id, const wchar_t *serial_number)$/;"	f
+hid_open_path	hid.c	/^HID_API_EXPORT hid_device * HID_API_CALL hid_open_path(const char *path)$/;"	f
+hid_read	hid.c	/^int HID_API_EXPORT HID_API_CALL hid_read(hid_device *dev, unsigned char *data, size_t length)$/;"	f
+hid_read_timeout	hid.c	/^int HID_API_EXPORT HID_API_CALL hid_read_timeout(hid_device *dev, unsigned char *data, size_t length, int milliseconds)$/;"	f
+hid_send_feature_report	hid.c	/^int HID_API_EXPORT HID_API_CALL hid_send_feature_report(hid_device *dev, const unsigned char *data, size_t length)$/;"	f
+hid_set_nonblocking	hid.c	/^int HID_API_EXPORT HID_API_CALL hid_set_nonblocking(hid_device *dev, int nonblock)$/;"	f
+hid_write	hid.c	/^int HID_API_EXPORT HID_API_CALL hid_write(hid_device *dev, const unsigned char *data, size_t length)$/;"	f
+initialized	hid.c	/^	static BOOLEAN initialized = FALSE;$/;"	v	file:
+input_report_length	hid.c	/^		size_t input_report_length;$/;"	m	struct:hid_device_	file:
+last_error_num	hid.c	/^		DWORD last_error_num;$/;"	m	struct:hid_device_	file:
+last_error_str	hid.c	/^		void *last_error_str;$/;"	m	struct:hid_device_	file:
+lib_handle	hid.c	/^	static HMODULE lib_handle = NULL;$/;"	v	file:
+lookup_functions	hid.c	/^static int lookup_functions()$/;"	f	file:
+main	aboot.c	/^int main(int argc, char* argv[])$/;"	f
+new_hid_device	hid.c	/^static hid_device *new_hid_device()$/;"	f	file:
+ol	hid.c	/^		OVERLAPPED ol;$/;"	m	struct:hid_device_	file:
+open_device	hid.c	/^static HANDLE open_device(const char *path, BOOL enumerate)$/;"	f	file:
+output_report_length	hid.c	/^		USHORT output_report_length;$/;"	m	struct:hid_device_	file:
+read_buf	hid.c	/^		char *read_buf;$/;"	m	struct:hid_device_	file:
+read_pending	hid.c	/^		BOOL read_pending;$/;"	m	struct:hid_device_	file:
+receive_file_data	aboot.c	/^static int receive_file_data(hid_device *usb, void * data, unsigned size, const char *name, int fsize)$/;"	f	file:
+register_error	hid.c	/^static void register_error(hid_device *device, const char *op)$/;"	f	file:
+xmodem_send_char	aboot.c	/^static fsm_type xmodem_send_char(hid_device *handle, char c,int timeout)$/;"	f	file:

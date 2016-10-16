@@ -537,7 +537,6 @@ HID_API_EXPORT hid_device * HID_API_CALL hid_open(unsigned short vendor_id, unsi
 	if (path_to_open) {
 		/* Open the device */
 		handle = hid_open_path(path_to_open);
-		printf("==func=%s, path=%s, handle=%x\n", __func__, path_to_open,handle);
 	}
 
 	hid_free_enumeration(devs);
@@ -589,7 +588,6 @@ HID_API_EXPORT hid_device * HID_API_CALL hid_open_path(const char *path)
 	}
 	dev->output_report_length = caps.OutputReportByteLength;
 	dev->input_report_length = caps.InputReportByteLength;
-	printf("==output len=%d,input len=%d\n", dev->output_report_length, dev->input_report_length);
 	HidD_FreePreparsedData(pp_data);
 
 	dev->read_buf = (char*) malloc(dev->input_report_length);

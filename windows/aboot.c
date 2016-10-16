@@ -20,12 +20,116 @@
 #include <stdlib.h>
 #include "hidapi.h"
 
+#define ENUMERATE 1
+#define USB_LEN   61
+
 // Headers needed for sleeping.
 #ifdef _WIN32
 	#include <windows.h>
 #else
 	#include <unistd.h>
 #endif
+
+typedef enum {
+fsm_err     = -1,
+fsm_cpl     =  0, 
+fsm_ongoing =  1,
+}fsm_type;
+
+static int receive_file_data(hid_device *dev, void * data, unsigned size, const char *name, int fsize);
+
+static fsm_type xmodem_send_char(hid_device *handle, char c,int timeout)
+{
+	int res = 0;
+	int retry = 0;
+	static unsigned  char sbuf[65] = {0};
+
+	memset(sbuf,0x00,sizeof(sbuf));
+	// Toggle LED (cmd 0x80). The first byte is the report number (0x1).
+	sbuf[0] = 0x00;
+	sbuf[1] = c;
+	retry = 0;
+	do {
+		res = hid_write(handle, sbuf, USB_LEN);
+		if (res < 0) {
+			printf("[%d]Error: %ls\n", ++retry, hid_error(handle));
+		}
+		Sleep(900);
+	}while((res < 0) && (retry <10));
+
+}
+
+static fsm_type do_xmodem(hid_device * handle)
+{
+	static enum {
+		STATE_START,
+		STATE_SEND_REQUEST,/* C */
+		STATE_SEND_REQUEST_WAIT,
+		STATE_SEND_ACK,/* D */
+		STATE_SEND_ACK_WAIT,
+		STATE_SEND_HANDSHAPE,/* C */
+		STATE_SEND_HANDSHAPE_WAIT,
+		STATE_RECV,/* recv block */
+		STATE_RECV_ACK, /* D */
+		STATE_CPL,
+	}s_state = STATE_START;
+	int fsize;
+	int retry;
+	unsigned char *pBuf = NULL;
+
+	switch(s_state) {
+
+		case STATE_START:
+			s_state++;
+			break;
+		case STATE_SEND_REQUEST:/* C */
+			printf("send C \n");
+			xmodem_send_char(handle, 'C', -1);
+			s_state++;
+			break;
+		case STATE_SEND_REQUEST_WAIT:
+			Sleep(200);
+			s_state++;
+			break;
+		case STATE_SEND_ACK:/* D */
+			printf("send D \n");
+			xmodem_send_char(handle, 'D', -1);
+			s_state++;
+			break;
+		case STATE_SEND_ACK_WAIT:
+			Sleep(200);
+			s_state++;
+			break;
+		case STATE_SEND_HANDSHAPE:/* C */
+			printf("send C \n");
+			xmodem_send_char(handle, 'C', -1);
+			s_state++;
+			break;
+		case STATE_SEND_HANDSHAPE_WAIT:
+			Sleep(200);
+			s_state++;
+			break;
+		case STATE_RECV:/* recv block */
+			Sleep(900);
+			s_state++;
+			break;
+		case STATE_RECV_ACK: /* D */
+			printf("send D \n");
+			xmodem_send_char(handle, 'D', -1);
+			s_state--;//DEBUG
+			break;
+		case STATE_CPL:
+			fsize = 128;
+			pBuf = malloc(fsize);
+			printf("recv file\n");
+			receive_file_data(handle, pBuf, fsize, "data.dat", fsize);
+
+			Sleep(200);
+			s_state = STATE_START;
+			return fsm_cpl;
+	}
+	return fsm_ongoing;
+}
 
 int main(int argc, char* argv[])
 {
@@ -35,7 +139,6 @@ int main(int argc, char* argv[])
 	wchar_t wstr[MAX_STR];
 	hid_device *handle;
 	int i;
-	int retry;
 
 #ifdef WIN32
 	UNREFERENCED_PARAMETER(argc);
@@ -46,7 +149,7 @@ int main(int argc, char* argv[])
 	
 	if (hid_init())
 		return -1;
-
+#if ENUMERATE
 	devs = hid_enumerate(0x0, 0x0);
 	cur_dev = devs;	
 	while (cur_dev) {
@@ -60,13 +163,13 @@ int main(int argc, char* argv[])
 		cur_dev = cur_dev->next;
 	}
 	hid_free_enumeration(devs);
+#endif
 
 	// Set up the command buffer.
 	memset(buf,0x00,sizeof(buf));
-	buf[0] = 0x01;
+	buf[0] = 0x00;
 	buf[1] = 0x81;
 	
-
 	// Open the device using the VID, PID,
 	// and optionally the Serial number.
 	////handle = hid_open(0x4d8, 0x3f, L"12345");
@@ -105,13 +208,12 @@ int main(int argc, char* argv[])
 		printf("Unable to read indexed string 1\n");
 	printf("Indexed String 1: %ls\n", wstr);
 
-
 	// Set the hid_read() function to be non-blocking.
 	hid_set_nonblocking(handle, 1);
 	
 	// Try to read from the device. There shoud be no
 	// data here, but execution should not block.
-	res = hid_read(handle, buf, 17);
+	res = hid_read(handle, buf, USB_LEN);
 
 #if 0
 	// Send a Feature Report to the device
@@ -124,7 +226,6 @@ int main(int argc, char* argv[])
 	if (res < 0) {
 		printf("Unable to send a feature report.\n");
 	}
-#endif
 
 	memset(buf,0,sizeof(buf));
 
@@ -142,43 +243,30 @@ int main(int argc, char* argv[])
 			printf("%02hhx ", buf[i]);
 		printf("\n");
 	}
+#endif
 
 	memset(buf,0,sizeof(buf));
 
-	// Toggle LED (cmd 0x80). The first byte is the report number (0x1).
-	buf[0] = 0x00;
-	buf[1] = 'C';
-	retry =65;
-	do {
-		res = hid_write(handle, buf, retry);
-		if (res < 0) {
-			printf("Unable to write()\n");
-			printf("[%d]Error: %ls\n", retry, hid_error(handle));
+	while (1) {
+		res = do_xmodem(handle);
+		if (res == fsm_err) {
+			break;
 		}
-		Sleep(900);
-	}while(0);
-	
+	}
 
-
-	// Request state (cmd 0x81). The first byte is the report number (0x1).
-	buf[0] = 0x1;
-	buf[1] = 'C';
-	hid_write(handle, buf, 65);
-	if (res < 0)
-		printf("Unable to write() (2)\n");
-
+#if 0
 	// Read requested state. hid_read() has been set to be
 	// non-blocking by the call to hid_set_nonblocking() above.
 	// This loop demonstrates the non-blocking nature of hid_read().
 	res = 0;
 	while (res == 0) {
-		res = hid_read(handle, buf, sizeof(buf));
+		res = hid_read(handle, buf, 65);
 		if (res == 0)
 			printf("waiting...\n");
 		if (res < 0)
 			printf("Unable to read()\n");
 		#ifdef WIN32
-		Sleep(500);
+		Sleep(990);
 		#else
 		usleep(500*1000);
 		#endif
@@ -189,8 +277,7 @@ int main(int argc, char* argv[])
 	for (i = 0; i < res; i++)
 		printf("%02hhx ", buf[i]);
 	printf("\n");
-
-	hid_close(handle);
+#endif
 
 	/* Free static HIDAPI objects. */
 	hid_exit();
@@ -201,3 +288,63 @@ int main(int argc, char* argv[])
 
 	return 0;
 }
+
+static int receive_file_data(hid_device *usb, void * data, unsigned size, const char *name, int fsize)
+{
+    unsigned char *status = data;
+    FILE *fp;
+    int r = 0;
+    int rece_count = 0;
+    int bytes = 0;
+
+    if (size == 0 ){
+            sprintf(ERROR, "Nothing to read (%d bytes)", r);
+    }
+
+    if((fp = fopen(name, "wb"))==NULL) {
+        printf("The file %s can not be opened.\n",name);
+        return -1;
+    }
+
+    fprintf(stderr, "open: file: (%s)\n", name);
+
+    for(;;) {
+	if (fsize > 64 ){
+        	r = hid_read(usb, status, 64);
+	} else if (fsize > 0) {
+        	r = hid_read(usb, status, fsize);
+	} else {/* fsize == 0 */
+		goto eof;
+	}
+        if(r < 0) {
+            sprintf(ERROR, "status read failed (%s)", strerror(errno));
+            break;
+	}
+        status[r] = 0;
+	fsize -= r;
+	bytes += r;
+        fprintf(stderr, "write:(%d)", r);
+    	if ((++rece_count %4) == 0)
+        	fprintf(stderr, "\n");
+
+	fwrite(status, r , 1 ,fp);
+	/* if fsize <= 0, that is to say, end of file */
+        if(fsize <= 0) {
+eof:        fprintf(stderr, "\nINFO: End Of File Found:(last pack:%d bytes)\n", r);
+            fprintf(stderr, "\nINFO: Total: %dbytes, %dkb, %dMb\n", bytes, (bytes>>10), (bytes>>20));
+	    /* read fastboot OKay from devices*/
+            r = hid_read(usb, status, 4);
+            status[r] = 0;
+            fprintf(stderr, "INFO: last recv=%d\n", r);
+	    hid_close(usb);
+            fclose(fp);
+            return 0;
+        }
+    }
+
+    hid_close(usb);
+    fclose(fp);
+
+    return -1;
+}
+
