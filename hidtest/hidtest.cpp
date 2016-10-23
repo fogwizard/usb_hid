@@ -73,7 +73,8 @@ static fsm_type xmodem_send_char(hid_device *handle, char c,int timeout)
 static fsm_type do_xmodem(hid_device * handle)
 {
 	int res;
-	unsigned char buf[61];
+	unsigned char i,buf[61];
+	char bufout[61*2+1];
 	static enum {
 		STATE_START,
 		STATE_SEND_REQUEST,/* C */
@@ -138,13 +139,21 @@ static fsm_type do_xmodem(hid_device * handle)
 			s_state = STATE_RECV;
 			break;
 		case STATE_RECV:/* recv block *///接收文件
-			Sleep(900);
+			Sleep(500);
 			res = hid_read(handle, buf, sizeof(buf));
 			if(res >0){  //
 				if(buf[0]==SOH){  //接收文件中
 					//COPY filedata to pbuf;
 					s_state = STATE_RECV_ACK;
+					for(i=0;i<61*2;i=i+2){
+						bufout[i] = buf[i/2]/16 + '0';
+						bufout[i+1] = buf[i/2]%16 + '0';
+					}
+					bufout[61*2] = '\0';
+					printf("%s",bufout);
+					printf("\n");
 					printf("receiving filedata \n");
+					xmodem_send_char(handle, 'D', -1);
 				}else if(buf[0]==EOT){ //Xmodem接收文件结束
 					s_state = STATE_CPL;
 					xmodem_send_char(handle, 'D', -1);
@@ -160,7 +169,7 @@ static fsm_type do_xmodem(hid_device * handle)
 			break;
 		case STATE_RECV_ACK: /* D */
 			printf("send D \n");
-			xmodem_send_char(handle, 'D', -1);
+			//xmodem_send_char(handle, 'D', -1);
 			s_state = STATE_RECV;//DEBUG
 			break;
 		case STATE_CPL:
