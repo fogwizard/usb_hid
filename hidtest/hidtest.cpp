@@ -26,15 +26,17 @@
 #define SOH  1
 #define STX  2
 #define EOT  4
-//#define ACK	 6
-//#define NAK  21
-//#define CAN  24
-//#define SUB  26
-#define SUB 'c'
-#define ACK 'D'
-#define NAK 'E'
-#define CAN 'F'
+#define ACK	 6
+#define NAK  21
+#define CAN  24
+#define SUB  26
+//#define SUB 'c'
+//#define ACK 'D'
+//#define NAK 'E'
+//#define CAN 'F'
 int write_count = 0;
+int file_recsize = 0;
+int file_reccount = 0;
 FILE *filep;
 const char *filename = "file1.txt";
 // Headers needed for sleeping.
@@ -202,6 +204,8 @@ static fsm_type do_xmodem(hid_device * handle)
 					fseek(filep,write_count,0);
 					i = 0;
 					rec_count = 0;
+					file_recsize = 0;
+					file_reccount = 0;
 					while(buf[i+3+write_count] !=SUB){
 						temp = (buf[3+i+write_count]/16);
 						if(temp <=9){
@@ -216,16 +220,19 @@ static fsm_type do_xmodem(hid_device * handle)
 						}else{
 							bufout[rec_count] = temp - 10 + 'A';
 						}
+						file_recsize = file_recsize<<8;	//接收数据字节数
+						file_recsize += buf[3+i+write_count];
 						rec_count++;
 						i++;
 					}
+					printf("%d",file_recsize);printf("\n");
 					bufout[rec_count++] = 'h';
 					bufout[rec_count++] = ' ';
 					fwrite(&bufout,rec_count,1,filep);
 					write_count += rec_count;
 					//fclose(filep);
 					//COPY the filename to pbuf；
-					xmodem_send_char(handle, 'D', -1);
+					xmodem_send_char(handle,ACK, -1);
 					s_state = STATE_SEND_ACK_WAIT;
 				}else{//不正确，发送NAK，让下位机重新发送
 					printf("filename err \n");
@@ -262,12 +269,10 @@ static fsm_type do_xmodem(hid_device * handle)
 						s_state = STATE_RECV_ACK;
 						fseek(filep,write_count,0);
 						printf("%d",write_count);printf("\n");
+						printf("receiving filedata %d\n",buf[1]);
 						i = 0;
 						rec_count = 0;
 						while(i<56){
-							//if(buf[i+3] ==SUB){
-							//	break;
-							//}else{
 							temp = (buf[3+i]/16);
 							if(temp <=9){
 								bufout[rec_count] = temp + '0';
@@ -281,24 +286,24 @@ static fsm_type do_xmodem(hid_device * handle)
 							}else{
 								bufout[rec_count] = temp - 10 + 'A';
 							}
-							rec_count++;
-							printf("receiving data ");
-							//}
+							rec_count++;							
 							i++;
+							file_reccount++;
 							if(i%4 == 0){//每次接收四个字节就是一个32位数据
 								bufout[rec_count++] = 'h';
 								bufout[rec_count++] = ' ';
 							}
-							printf("\n");
+							if(file_reccount >=file_recsize){
+								printf("receive data finish\n");
+								break;
+							}
 						}
-						printf("%d",rec_count);printf("\n");
 						fwrite(&bufout,rec_count,1,filep);
 						write_count += rec_count;
-						printf("receiving filedata \n");
-						xmodem_send_char(handle, 'D', -1);
+						xmodem_send_char(handle, ACK, -1);
 					}else if(buf[0]==EOT){ //Xmodem接收文件结束
 						s_state = STATE_CPL;
-						xmodem_send_char(handle, 'D', -1);
+						xmodem_send_char(handle, ACK, -1);
 						printf("receive complete signal \n");
 					}else{  //数据干扰出错，否则不会到这里
 						s_state = STATE_RECV;
@@ -319,7 +324,7 @@ static fsm_type do_xmodem(hid_device * handle)
 			break;
 		case STATE_RECV_ACK: /* D */
 			printf("send D \n");
-			//xmodem_send_char(handle, 'D', -1);
+			//xmodem_send_char(handle, ACK, -1);
 			s_state = STATE_RECV;//DEBUG
 			break;
 		case STATE_CPL:
