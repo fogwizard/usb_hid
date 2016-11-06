@@ -26,9 +26,10 @@
 #define SOH  1
 #define STX  2
 #define EOT  4
-// #define ACK 6
-// #define NAK 21
-// #define CAN 24
+//#define ACK	 6
+//#define NAK  21
+//#define CAN  24
+//#define SUB  26
 #define SUB 'c'
 #define ACK 'D'
 #define NAK 'E'
@@ -202,8 +203,20 @@ static fsm_type do_xmodem(hid_device * handle)
 					i = 0;
 					rec_count = 0;
 					while(buf[i+3+write_count] !=SUB){
-						bufout[rec_count++] = (buf[3+write_count+i]/16)+'0';
-						bufout[rec_count++] = (buf[3+write_count+i]%16)+'0';
+						temp = (buf[3+i+write_count]/16);
+						if(temp <=9){
+							bufout[rec_count] = temp + '0';
+						}else{
+							bufout[rec_count] = temp - 10 + 'A';
+						}
+						rec_count++;							
+						temp = (buf[3+i+write_count]%16);
+						if(temp <=9){
+							bufout[rec_count] = temp + '0';
+						}else{
+							bufout[rec_count] = temp - 10 + 'A';
+						}
+						rec_count++;
 						i++;
 					}
 					bufout[rec_count++] = 'h';
@@ -247,13 +260,6 @@ static fsm_type do_xmodem(hid_device * handle)
 					if(buf[0]==SOH){  //接收文件中
 						//COPY filedata to pbuf;
 						s_state = STATE_RECV_ACK;
-						//if((filep = fopen(filename, "wb"))==NULL) {
-						//	printf("The file %s can not be opened.\n",filename);		
-						//	xmodem_send_char(handle,NAK, -1);
-						//	s_state = STATE_RECV;
-						//	break;
-						//}
-						//write_count +=rec_count;
 						fseek(filep,write_count,0);
 						printf("%d",write_count);printf("\n");
 						i = 0;
@@ -298,15 +304,18 @@ static fsm_type do_xmodem(hid_device * handle)
 						s_state = STATE_RECV;
 						printf("receive error data \n");
 					}
-				}else{	//没接收到数据，等到一段时间还没有数据，结束过程
+				}else{//CRC校验错误
+					printf("CRC16 checkout err");
+					printf("%d",crc);printf("\n");
+					crc = buf[59]*256+buf[60];
+					printf("%d",crc);printf("\n");
+					xmodem_send_char(handle,NAK, -1);
+					s_state = STATE_RECV;
+				}
+			}else{	//没接收到数据，等到一段时间还没有数据，结束过程
 					s_state = STATE_RECV;
 					printf("send filedata but no data \n");
 				}
-			}else{//CRC校验错误
-				printf("CRC16 checkout err");
-				xmodem_send_char(handle,NAK, -1);
-				s_state = STATE_RECV;
-			}
 			break;
 		case STATE_RECV_ACK: /* D */
 			printf("send D \n");
