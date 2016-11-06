@@ -33,7 +33,9 @@
 #define ACK 'D'
 #define NAK 'E'
 #define CAN 'F'
-
+int write_count = 0;
+FILE *filep;
+const char *filename = "file1.txt";
 // Headers needed for sleeping.
 #ifdef _WIN32
 	#include <windows.h>
@@ -138,8 +140,8 @@ static fsm_type xmodem_send_char(hid_device *handle, char c,int timeout)
 static fsm_type do_xmodem(hid_device * handle)
 {
 	int res,rec_count;
-	unsigned char i,buf[61];
-	char bufout[61*2+1];
+	unsigned char i,temp,buf[61];
+	unsigned char bufout[61*6];
 	static enum {
 		STATE_START,
 		STATE_SEND_REQUEST,/* C */
@@ -156,6 +158,9 @@ static fsm_type do_xmodem(hid_device * handle)
 	int retry;
 	unsigned char *pBuf = NULL;
 	unsigned short crc;
+    int r = 0;
+    int bytes = 0;
+
 	switch(s_state) {
 
 		case STATE_START:
@@ -178,12 +183,34 @@ static fsm_type do_xmodem(hid_device * handle)
 				crc= crc16(buf,(sizeof(buf)-2));
 				if((buf[0]==SOH)&&(buf[3] == 'f')&&(buf[59] ==(unsigned char)(crc>>8))&&(buf[60] ==(unsigned char)(crc&0x00ff))){  //判断首字节和文件名是否在文件规则内
 					printf("send D \n");
-					printf("we have receive the file name and the capacity \n");
-				//	for(i=0;i<56;i++){
-				//		if(buf[i+3] !=SUB){
-				//			pBuf[rec_count++] = buf[i+3];
-				//		}
-				//	}
+					printf("we have receive the file name and the capacity \n");				
+					if((filep = fopen(filename, "wb"))==NULL) {
+						printf("The file %s can not be opened.\n",filename);
+						xmodem_send_char(handle,NAK, -1);
+						s_state = STATE_SEND_REQUEST_WAIT;
+						break;
+					}
+					i = 0;
+					rec_count = 0;
+					while(buf[i+3] !=SUB){
+						bufout[rec_count++] = buf[3+i++];
+					}
+					bufout[rec_count++] = ' ';
+					fwrite(&bufout,rec_count ,1,filep);
+					write_count += rec_count;
+					fseek(filep,write_count,0);
+					i = 0;
+					rec_count = 0;
+					while(buf[i+3+write_count] !=SUB){
+						bufout[rec_count++] = (buf[3+write_count+i]/16)+'0';
+						bufout[rec_count++] = (buf[3+write_count+i]%16)+'0';
+						i++;
+					}
+					bufout[rec_count++] = 'h';
+					bufout[rec_count++] = ' ';
+					fwrite(&bufout,rec_count,1,filep);
+					write_count += rec_count;
+					//fclose(filep);
 					//COPY the filename to pbuf；
 					xmodem_send_char(handle, 'D', -1);
 					s_state = STATE_SEND_ACK_WAIT;
@@ -216,30 +243,70 @@ static fsm_type do_xmodem(hid_device * handle)
 			res = hid_read(handle, buf, sizeof(buf));
 			if(res >0){  //
 				crc= crc16(buf,(sizeof(buf)-2));
-				if((buf[0]==SOH)&&(buf[59] ==(unsigned char)(crc>>8))&&(buf[60] ==(unsigned char)(crc&0x00ff))){  //接收文件中
-					//COPY filedata to pbuf;
-					s_state = STATE_RECV_ACK;
-					for(i=0;i<61*2;i=i+2){
-						bufout[i] = buf[i/2]/16 + '0';
-						bufout[i+1] = buf[i/2]%16 + '0';
+				if((buf[59] ==(unsigned char)(crc>>8))&&(buf[60] ==(unsigned char)(crc&0x00ff))){
+					if(buf[0]==SOH){  //接收文件中
+						//COPY filedata to pbuf;
+						s_state = STATE_RECV_ACK;
+						//if((filep = fopen(filename, "wb"))==NULL) {
+						//	printf("The file %s can not be opened.\n",filename);		
+						//	xmodem_send_char(handle,NAK, -1);
+						//	s_state = STATE_RECV;
+						//	break;
+						//}
+						//write_count +=rec_count;
+						fseek(filep,write_count,0);
+						printf("%d",write_count);printf("\n");
+						i = 0;
+						rec_count = 0;
+						while(i<56){
+							//if(buf[i+3] ==SUB){
+							//	break;
+							//}else{
+							temp = (buf[3+i]/16);
+							if(temp <=9){
+								bufout[rec_count] = temp + '0';
+							}else{
+								bufout[rec_count] = temp - 10 + 'A';
+							}
+							rec_count++;							
+							temp = (buf[3+i]%16);
+							if(temp <=9){
+								bufout[rec_count] = temp + '0';
+							}else{
+								bufout[rec_count] = temp - 10 + 'A';
+							}
+							rec_count++;
+							printf("receiving data ");
+							//}
+							i++;
+							if(i%4 == 0){//每次接收四个字节就是一个32位数据
+								bufout[rec_count++] = 'h';
+								bufout[rec_count++] = ' ';
+							}
+							printf("\n");
+						}
+						printf("%d",rec_count);printf("\n");
+						fwrite(&bufout,rec_count,1,filep);
+						write_count += rec_count;
+						printf("receiving filedata \n");
+						xmodem_send_char(handle, 'D', -1);
+					}else if(buf[0]==EOT){ //Xmodem接收文件结束
+						s_state = STATE_CPL;
+						xmodem_send_char(handle, 'D', -1);
+						printf("receive complete signal \n");
+					}else{  //数据干扰出错，否则不会到这里
+						s_state = STATE_RECV;
+						printf("receive error data \n");
 					}
-					bufout[61*2] = '\0';
-					printf("%s",bufout);
-					printf("\n");
-					printf("receiving filedata \n");
-					xmodem_send_char(handle, 'D', -1);
-				}else if(buf[0]==EOT){ //Xmodem接收文件结束
-					s_state = STATE_CPL;
-					xmodem_send_char(handle, 'D', -1);
-					printf("receive complete signal \n");
-				}else{  //数据干扰出错，否则不会到这里
+				}else{	//没接收到数据，等到一段时间还没有数据，结束过程
 					s_state = STATE_RECV;
-					printf("receive error data \n");
+					printf("send filedata but no data \n");
 				}
-			}else{	//没接收到数据，等到一段时间还没有数据，结束过程
+			}else{//CRC校验错误
+				printf("CRC16 checkout err");
+				xmodem_send_char(handle,NAK, -1);
 				s_state = STATE_RECV;
-				printf("send filedata but no data \n");
-			}			
+			}
 			break;
 		case STATE_RECV_ACK: /* D */
 			printf("send D \n");
@@ -250,9 +317,9 @@ static fsm_type do_xmodem(hid_device * handle)
 			fsize = 128;
 			pBuf =(unsigned char *) malloc(fsize);  //debug
 			printf("recv file\n");
+			fclose(filep);
 			while(1);
-			receive_file_data(handle, pBuf, fsize, "data.dat", fsize);//这个文件有错，没能保存数据
-
+		//	receive_file_data(handle, pBuf, fsize, "data.dat", fsize);//这个文件有错，没能保存数据
 			Sleep(200);
 			s_state = STATE_START;
 			while(1);
